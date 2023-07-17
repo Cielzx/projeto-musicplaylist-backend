@@ -1,14 +1,18 @@
+import { Injectable } from '@nestjs/common';
 import { CreateMusicDto } from '../../dto/create-music.dto';
 import { UpdateMusicDto } from '../../dto/update-music.dto';
 import { Music } from '../../entities/music.entity';
 import { MusicRepository } from '../musics.repository';
 
+@Injectable()
 export class MusicInMemory implements MusicRepository {
   private database: Music[] = [];
   async create(data: CreateMusicDto): Promise<Music> {
     const newMusic = new Music();
     Object.assign(newMusic, {
       ...data,
+      cover_image: data.cover_image || null,
+      music_url: data.music_url || null,
     });
 
     this.database.push(newMusic);
@@ -33,7 +37,7 @@ export class MusicInMemory implements MusicRepository {
     const music = this.database.find((music) => music.id === id);
     return music;
   }
-  update(data: UpdateMusicDto, id: string): Music | Promise<Music> {
+  async update(data: UpdateMusicDto, id: string): Promise<Music> {
     throw new Error('Method not implemented.');
   }
   delete(id: string): void | Promise<void> {

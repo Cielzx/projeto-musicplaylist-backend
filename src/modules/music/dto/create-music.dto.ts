@@ -33,5 +33,6 @@ export class CreateMusicDto {
 
   @IsString()
   @IsNotEmpty()
+  @IsOptional()
   user_id: string;
 }
