@@ -17,7 +17,10 @@ export class UsersPrismaRepo implements UsersRepository {
 
     const newUser = await this.prisma.user.create({
       data: {
-        ...user,
+        id: user.id,
+        name: data.name,
+        email: data.email,
+        password: data.password,
       },
     });
 
@@ -30,6 +33,7 @@ export class UsersPrismaRepo implements UsersRepository {
   async findOne(id: string): Promise<User> {
     const user = await this.prisma.user.findUnique({
       where: { id },
+      include: { music: true },
     });
 
     return plainToInstance(User, user);

@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { v2 as cloud } from 'cloudinary';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersRepository } from './repositories/users.repository';
 
@@ -29,7 +30,6 @@ export class UsersService {
 
   async findOne(id: string) {
     const user = await this.UsersRepositor.findOne(id);
-    console.log(user);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -39,6 +39,36 @@ export class UsersService {
   async findByEmail(email: string) {
     const user = await this.UsersRepositor.findByEmail(email);
     return user;
+  }
+
+  async upload(profile_image: Express.Multer.File, id: string) {
+    cloud.config({
+      cloud_name: process.env.CLOUD_NAME,
+      api_key: process.env.API_KEY,
+      api_secret: process.env.API_SECRET,
+    });
+
+    const findUser = await this.UsersRepositor.findOne(id);
+    if (!findUser) {
+      throw new NotFoundException('User not found!');
+    }
+
+    const imageUpload = await cloud.uploader.upload(
+      profile_image.path,
+      { resource_type: 'image' },
+      (error, result) => {
+        return result;
+      },
+    );
+
+    const updateUser = await this.UsersRepositor.update(
+      {
+        profile_image: imageUpload.secure_url,
+      },
+      id,
+    );
+
+    return updateUser;
   }
 
   async update(updateUserDto: UpdateUserDto, id: string) {

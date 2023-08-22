@@ -3,6 +3,8 @@ import { NotFoundException, Injectable } from '@nestjs/common';
 import { CreateMusicDto } from './dto/create-music.dto';
 import { v2 as cloud } from 'cloudinary';
 import { MusicRepository } from './repositories/musics.repository';
+import { PaginationDto } from './dto/pagination-music.dto';
+import { FiltersMusicDto } from './dto/filter-music.dto';
 
 @Injectable()
 export class MusicService {
@@ -13,8 +15,19 @@ export class MusicService {
     return music;
   }
 
-  async findAll(group: string | undefined) {
-    return await this.MusicRepository.findAll(group);
+  async findAll(group: string | undefined, genre: string | undefined) {
+    return await this.MusicRepository.findAll(group, genre);
+  }
+
+  async findByQuery(paginationDto: PaginationDto, filters?: FiltersMusicDto) {
+    const { page = '1', limit = '15' } = paginationDto;
+
+    const advertisements = await this.MusicRepository.findByQuery(
+      page,
+      limit,
+      filters,
+    );
+    return advertisements;
   }
 
   async findOne(id: string) {
@@ -57,8 +70,6 @@ export class MusicService {
       },
     );
 
-    console.log(audioUpload, imageUpload);
-
     const updateMusic = await this.MusicRepository.update(
       {
         cover_image: imageUpload.secure_url,
@@ -70,7 +81,12 @@ export class MusicService {
     return updateMusic;
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} music`;
+  async remove(id: string) {
+    const findMusic = await this.MusicRepository.findOne(id);
+    if (!findMusic) {
+      throw new NotFoundException('Music not found!');
+    }
+    await this.MusicRepository.delete(id);
+    return;
   }
 }

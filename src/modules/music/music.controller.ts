@@ -11,6 +11,7 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFiles,
+  HttpCode,
 } from '@nestjs/common';
 import { MusicService } from './music.service';
 import { CreateMusicDto } from './dto/create-music.dto';
@@ -18,6 +19,8 @@ import { UpdateMusicDto } from './dto/update-music.dto';
 import { JwtAuth } from '../auth/jwt-auth.guard';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { PaginationDto } from './dto/pagination-music.dto';
+import { FiltersMusicDto } from './dto/filter-music.dto';
 
 @Controller('music')
 @ApiTags('Musics')
@@ -37,8 +40,19 @@ export class MusicController {
     type: String,
     required: false,
   })
-  findAll(@Query('group') group: string | undefined) {
-    return this.musicService.findAll(group);
+  findAll(
+    @Query('group') group: string | undefined,
+    @Query('genre') genre: string | undefined,
+  ) {
+    return this.musicService.findAll(group, genre);
+  }
+
+  @Get('pagination')
+  findByQuery(
+    @Query() PaginationDto: PaginationDto,
+    @Query() filters?: FiltersMusicDto,
+  ) {
+    return this.musicService.findByQuery(PaginationDto, filters);
   }
 
   @Get(':id')
@@ -67,6 +81,7 @@ export class MusicController {
 
   @Delete(':id')
   @UseGuards(JwtAuth)
+  @HttpCode(204)
   @ApiBearerAuth()
   remove(@Param('id') id: string) {
     return this.musicService.remove(id);

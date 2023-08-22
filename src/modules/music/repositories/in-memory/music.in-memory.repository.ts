@@ -3,6 +3,8 @@ import { CreateMusicDto } from '../../dto/create-music.dto';
 import { UpdateMusicDto } from '../../dto/update-music.dto';
 import { Music } from '../../entities/music.entity';
 import { MusicRepository } from '../musics.repository';
+import { FiltersMusicDto } from '../../dto/filter-music.dto';
+import { MusicPagination } from '../../dto/pagination-music.dto';
 
 @Injectable()
 export class MusicInMemory implements MusicRepository {
@@ -31,6 +33,14 @@ export class MusicInMemory implements MusicRepository {
       return this.grouperby(this.database, group);
     }
     return this.database;
+  }
+
+  async findByQuery(
+    page: string,
+    limit: string,
+    filters?: FiltersMusicDto,
+  ): Promise<MusicPagination> {
+    throw new Error('Not implemented');
   }
 
   async findOne(id: string): Promise<Music> {
