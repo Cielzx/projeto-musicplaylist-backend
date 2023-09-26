@@ -18,6 +18,7 @@ model User {
   profile_image String?
   description String?
   music    Music[]
+  historic Historic[]
 
   @@map("users")
 }
@@ -35,4 +36,15 @@ model Music {
   userId      String
 
   @@map("musics")
+}
+
+model Historic {
+  id String @id
+  music_name String
+  artist String
+  played_at DateTime @default(now())
+  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+  userId String
+
+  @@map("historics")
 }
